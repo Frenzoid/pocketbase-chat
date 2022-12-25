@@ -26,7 +26,7 @@
     try {
       errorMessage = "";
 
-      // This actually deleted the message:
+      // This actually deletes the message:
       // await pb.collection("messages").delete(message.id);
 
       // This is a soft delete, it will set the deleted field to true.
