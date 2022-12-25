@@ -1,9 +1,15 @@
 # Chatopolis
 
-<img src="./assets/chat.png">
-
 A chat application built with Svelte and PocketBase.
 I made this to teach myself how PocketBase works.
+
+<hr>
+<img src="./assets/login.png">
+<hr>
+<img src="./assets/chat.png">
+<hr>
+<img src="./assets/pocketbase.png">
+<hr>
 
 ## Getting started
 
