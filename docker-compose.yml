@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    container_name: POCKETBASE_SERVER
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+
+    volumes:
+      # Mount volume for persistence.
+      - pocketbase_volume:/pb_data
+      # Mount dist folder to serve the chat app.
+      - ./dist:/pb_public
