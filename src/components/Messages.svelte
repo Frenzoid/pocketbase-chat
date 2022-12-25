@@ -10,8 +10,11 @@
 
   async function sendMessage() {
     try {
+      errorMessage = "";
+
       const data = { text: newMessage, author: $currentUser.id };
       await pb.collection("messages").create(data);
+
       console.log("Message succesfully sent:", data);
     } catch (error) {
       errorMessage = error.message;
@@ -21,7 +24,15 @@
 
   async function deleteMessage(message: Record<string, any>) {
     try {
-      await pb.collection("messages").delete(message.id);
+      errorMessage = "";
+
+      // This actually deleted the message:
+      // await pb.collection("messages").delete(message.id);
+
+      // This is a soft delete, it will set the deleted field to true.
+      await pb.collection("messages").update(message.id, { deleted: true });
+      messages = messages.filter((msg) => msg.id !== message.id);
+
       console.log("Message succesfully deleted:", message);
     } catch (error) {
       errorMessage = error.message;
@@ -33,21 +44,26 @@
   onMount(async () => {
     // Get Initial Messages
     try {
-      const { items } = await pb
-        .collection("messages")
-        .getList(1, 50, { sort: "-created", expand: "author" });
+      const { items } = await pb.collection("messages").getList(1, 50, {
+        sort: "-created",
+        expand: "author",
+        filter: "deleted = false",
+      });
       messages = items;
 
       // Subscribe to New Messages, this will update the messages array or delete a message from the array.
       unsubscribe = await pb
         .collection("messages")
         .subscribe("*", async ({ action, record }) => {
+          errorMessage = "";
+
           if (action === "create") {
             const author = await pb.collection("users").getOne(record.author);
             record.expand = { author };
             messages = [record, ...messages];
           } else if (action === "delete") {
-            messages = messages.filter((message) => message.id !== record.id);
+            // On delete event, remove deleted message from interface.
+            // messages = messages.filter((message) => message.id !== record.id);
           }
         });
     } catch (error) {
