@@ -1,0 +1,26 @@
+{
+  "name": "pockebase-chat",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.0.2",
+    "@tsconfig/svelte": "^3.0.0",
+    "svelte": "^3.54.0",
+    "svelte-check": "^2.10.0",
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.0"
+  },
+  "dependencies": {
+    "bootstrap": "^5.2.3",
+    "pocketbase": "^0.9.1",
+    "rollup-plugin-copy": "^3.4.0"
+  }
+}
