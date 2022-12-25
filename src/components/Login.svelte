@@ -1,10 +1,11 @@
 <script lang="ts">
   import { currentUser, pb } from "../lib/pocketbase";
 
-  let username: string;
-  let password: string;
+  let username = "";
+  let password = "";
 
   let errorMessage = "";
+  let loading = false;
 
   function clearForm() {
     username = "";
@@ -13,17 +14,32 @@
 
   async function login() {
     try {
+      errorMessage = "";
+      loading = true;
+
       await pb.collection("users").authWithPassword(username, password);
       console.log("User succesfully logged in:", $currentUser);
+
       clearForm();
     } catch (error) {
       errorMessage = error.message;
       console.error("Error logging in user:", error);
+    } finally {
+      loading = false;
     }
   }
 
   async function register() {
     try {
+      errorMessage = "";
+      loading = true;
+
+      if (username.length < 4)
+        throw new Error("Username must be at least 4 characters long");
+
+      if (password.length < 8)
+        throw new Error("Password must be at least 8 characters long");
+
       const data = {
         username,
         password,
@@ -37,6 +53,8 @@
     } catch (error) {
       errorMessage = error.message;
       console.error("Error registering user:", error);
+    } finally {
+      loading = false;
     }
   }
 
@@ -54,7 +72,7 @@
     >!
   </h1>
   <div class="mb-4 d-flex flex-row justify-content-center flex-nowrap">
-    <button class="btn btn-danger col-12" on:click={logoff}>Log Off</button>
+    <button class="btn btn-danger col-3" on:click={logoff}>Logoff</button>
   </div>
 {:else}
   <form class="form-signin my-5" on:submit|preventDefault>
@@ -66,6 +84,7 @@
       type="username"
       class="form-control"
       placeholder="Username"
+      disabled={loading}
       bind:value={username}
     />
     <label for="inputPassword" class="sr-only">Password</label>
@@ -73,17 +92,24 @@
       type="password"
       class="form-control"
       placeholder="Password"
+      disabled={loading}
       bind:value={password}
     />
-    <button class="btn btn-primary mt-3" on:click={login}> Login </button>
-    <button class="btn btn-primary mt-3" on:click={register}>Register</button>
+    {#if loading}
+      <div class="d-flex flex-row justify-content-center">
+        <div class="spinner-border text-primary mt-3" role="status">
+          <span class="sr-only" />
+        </div>
+      </div>
+    {:else}
+      <button class="btn btn-primary mt-3" on:click={login}>Login</button>
+      <button class="btn btn-primary mt-3" on:click={register}>Register</button>
+    {/if}
 
     {#if errorMessage}
       <div class="alert alert-danger my-3" role="alert">
         Error: {errorMessage}
       </div>
     {/if}
-
-    <p class="mt-5 mb-3 text-muted">© 2022 - 2023</p>
   </form>
 {/if}

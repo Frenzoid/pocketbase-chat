@@ -7,10 +7,15 @@
   let unsubscribe: () => void;
 
   let errorMessage = "";
+  let loading = false;
 
   async function sendMessage() {
     try {
       errorMessage = "";
+      loading = true;
+
+      if (newMessage.length < 2)
+        throw new Error("Message must be at least 2 characters long");
 
       const data = { text: newMessage, author: $currentUser.id };
       await pb.collection("messages").create(data);
@@ -19,12 +24,15 @@
     } catch (error) {
       errorMessage = error.message;
       console.error("Error sending message:", error);
+    } finally {
+      loading = false;
     }
   }
 
   async function deleteMessage(message: Record<string, any>) {
     try {
       errorMessage = "";
+      loading = true;
 
       // This actually deletes the message:
       // await pb.collection("messages").delete(message.id);
@@ -36,14 +44,17 @@
       console.log("Message succesfully deleted:", message);
     } catch (error) {
       errorMessage = error.message;
-
       console.error("Error deleting message:", error);
+    } finally {
+      loading = false;
     }
   }
 
   onMount(async () => {
     // Get Initial Messages
     try {
+      loading = true;
+
       const { items } = await pb.collection("messages").getList(1, 50, {
         sort: "-created",
         expand: "author",
@@ -69,6 +80,8 @@
     } catch (error) {
       errorMessage = error.message;
       console.error("Error getting messages:", error);
+    } finally {
+      loading = false;
     }
   });
 
@@ -83,15 +96,26 @@
   <form on:submit|preventDefault>
     <div class="form-group">
       <h4>New Message</h4>
-      <input
-        type="text"
+      <textarea
         class="form-control"
         placeholder="Enter new message"
         bind:value={newMessage}
+        disabled={loading}
       />
-      <button class="btn btn-primary btn-sm col-12 mt-2" on:click={sendMessage}>
-        Send
-      </button>
+      {#if loading}
+        <div class="d-flex flex-row justify-content-center">
+          <div class="spinner-border text-primary mt-2" role="status">
+            <span class="sr-only" />
+          </div>
+        </div>
+      {:else}
+        <button
+          class="btn btn-primary btn-sm col-3 mt-2"
+          on:click={sendMessage}
+        >
+          Send
+        </button>
+      {/if}
     </div>
   </form>
 
@@ -136,10 +160,10 @@
         {#if message.author == $currentUser.id}
           <hr />
           <button
-            class="btn btn-danger btn-sm col-12"
+            class="btn btn-danger btn-sm col-3"
             on:click={() => deleteMessage(message)}
           >
-            Delete
+            Delete this message
           </button>
         {/if}
       </div>
